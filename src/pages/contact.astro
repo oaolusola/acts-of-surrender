@@ -21,76 +21,94 @@ import Layout from "../layouts/Layout.astro";
   </p>
 
   <div class="card">
-  <form id="contact-form">
-    <label>
-      <span class="small">Name</span><br />
-      <input name="name" type="text" required />
-    </label>
+    <form id="contact-form">
+      <label>
+        <span class="small">Name</span><br />
+        <input name="name" type="text" required />
+      </label>
 
-    <div style="height:.75rem;"></div>
+      <div style="height:.75rem;"></div>
 
-    <label>
-      <span class="small">Email</span><br />
-      <input name="email" type="email" required />
-    </label>
+      <label>
+        <span class="small">Email</span><br />
+        <input name="email" type="email" required />
+      </label>
 
-    <div style="height:.75rem;"></div>
+      <div style="height:.75rem;"></div>
 
-    <label>
-      <span class="small">Message</span><br />
-      <textarea name="message" rows="6" required></textarea>
-    </label>
+      <label>
+        <span class="small">Message</span><br />
+        <textarea name="message" rows="6" required></textarea>
+      </label>
 
-    <!-- Honeypot (spam trap). Humans won't fill this; bots often will. -->
-    <input name="company" type="text" tabindex="-1" autocomplete="off" class="hp" />
+      <!-- Honeypot (spam trap). Humans won't fill this; bots often will. -->
+      <input
+        name="company"
+        type="text"
+        tabindex="-1"
+        autocomplete="off"
+        class="hp"
+      />
 
-    <div style="height:1rem;"></div>
+      <div style="height:1rem;"></div>
 
-    <button class="btn primary" type="submit">Send message</button>
+      <button class="btn primary" type="submit">Send message</button>
 
-    <p class="small" style="margin-top:.85rem;margin-bottom:0;">
-      Prefer email? <a href="mailto:admin@acts-of-surrender.com">admin@acts-of-surrender.com</a>
-    </p>
+      <p class="small" style="margin-top:.85rem;margin-bottom:0;">
+        Prefer email? <a href="mailto:admin@acts-of-surrender.com">admin@acts-of-surrender.com</a>
+      </p>
 
-    <p class="small" id="form-status" aria-live="polite" style="margin-top:.75rem;"></p>
-  </form>
-</div>
+      <p class="small" id="form-status" aria-live="polite" style="margin-top:.75rem;"></p>
+    </form>
+  </div>
 
-<script>
-  const form = document.getElementById("contact-form");
-  const status = document.getElementById("form-status");
+  <script>
+    const form = document.getElementById("contact-form");
+    const status = document.getElementById("form-status");
 
-  if (form && status) {
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    const FORMSPREE_ENDPOINT = "https://formspree.io/f/mpqzjrja";
 
-      status.textContent = "Sending…";
+    if (form && status) {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-      const fd = new FormData(form);
-      const payload = Object.fromEntries(fd.entries());
+        status.textContent = "Sending…";
 
-      try {
-        const res = await fetch("/api/contact", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        const fd = new FormData(form);
 
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok) {
-          status.textContent = data?.error || "Sorry — something went wrong. Please email instead.";
+        // Honeypot: if filled, silently pretend success
+        if ((fd.get("company") || "").toString().trim()) {
+          form.reset();
+          status.textContent = "Sent. Thank you — I’ll get back to you soon.";
           return;
         }
 
-        form.reset();
-        status.textContent = "Sent. Thank you — I’ll get back to you soon.";
-      } catch (err) {
-        status.textContent = "Network error. Please try again, or email instead.";
-      }
-    });
-  }
-</script>
+        try {
+          const res = await fetch(FORMSPREE_ENDPOINT, {
+            method: "POST",
+            headers: { "Accept": "application/json" },
+            body: fd,
+          });
+
+          const data = await res.json().catch(() => ({}));
+
+          if (!res.ok) {
+            // Formspree often returns an errors array
+            const msg =
+              (data && data.errors && data.errors[0] && data.errors[0].message) ||
+              "Sorry — something went wrong. Please email instead.";
+            status.textContent = msg;
+            return;
+          }
+
+          form.reset();
+          status.textContent = "Sent. Thank you — I’ll get back to you soon.";
+        } catch (err) {
+          status.textContent = "Network error. Please try again, or email instead.";
+        }
+      });
+    }
+  </script>
 
   <hr />
 
@@ -98,7 +116,12 @@ import Layout from "../layouts/Layout.astro";
   <p>Subscribe on Substack to receive new essays and audio in your inbox.</p>
 
   <div class="btnrow">
-    <a class="btn primary" href="https://actsofsurrender.substack.com/subscribe" target="_blank" rel="noopener noreferrer">
+    <a
+      class="btn primary"
+      href="https://actsofsurrender.substack.com/subscribe"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       Subscribe on Substack
     </a>
   </div>
