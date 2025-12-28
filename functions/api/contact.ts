@@ -1,4 +1,4 @@
-export const onRequestPost: PagesFunction = async (context) => {
+export const onRequestPost = async (context: any) => {
   try {
     const { request, env } = context;
 
@@ -27,17 +27,16 @@ export const onRequestPost: PagesFunction = async (context) => {
       return json({ error: "Please enter a valid email address." }, 400);
     }
 
-    // Cloudflare env vars (you’ll set these in Cloudflare Pages later)
-    const TO_EMAIL = (env.TO_EMAIL as string) || "";
-    const FROM_EMAIL = (env.FROM_EMAIL as string) || "";
+    // Cloudflare env vars (set in Cloudflare Pages → Settings → Variables and secrets)
+    const TO_EMAIL = String(env?.TO_EMAIL ?? "").trim();
+    const FROM_EMAIL = String(env?.FROM_EMAIL ?? "").trim();
 
     if (!TO_EMAIL || !FROM_EMAIL) {
       // Don’t leak configuration details to users
       return json({ error: "Email service not configured yet." }, 500);
     }
 
-    // MailChannels (built-in option commonly used on Cloudflare Workers/Pages)
-    // Note: some sender domains may require verification depending on your setup.
+    // MailChannels (common option on Cloudflare)
     const subject = `New message from Acts of Surrender site: ${name}`;
     const text = `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}\n`;
 
@@ -61,21 +60,29 @@ export const onRequestPost: PagesFunction = async (context) => {
 
     if (!resp.ok) {
       const errText = await resp.text().catch(() => "");
-      return json({ error: "Failed to send message." }, 502, errText);
+      console.error("MailChannels error:", resp.status, errText);
+
+      return json(
+        {
+          error:
+            "Failed to send message. (Email provider rejected the request — we may need to adjust the sender address.)",
+          providerStatus: resp.status,
+        },
+        502
+      );
     }
 
+    // Success
     return json({ ok: true }, 200);
-  } catch {
-    return json({ error: "Unexpected server error." }, 500);
+  } catch (err: any) {
+    console.error("Contact function error:", err?.message || err);
+    return json({ error: "Server error." }, 500);
   }
 };
 
-function json(body: any, status = 200, debug?: string) {
-  // You can log debug later in Cloudflare if needed; we don’t return it to the client.
+function json(body: any, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-    },
+    headers: { "content-type": "application/json; charset=utf-8" },
   });
 }
