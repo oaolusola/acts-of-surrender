@@ -1,16 +1,100 @@
 ---
+import Layout from "../layouts/Layout.astro";
+import { fetchSubstackEssays } from "../lib/substack";
 
+const FEED_URL = "https://actsofsurrender.substack.com/feed";
+const essays = await fetchSubstackEssays(FEED_URL);
+const latestEssay = essays?.[0];
+
+const PLAYLIST_ID = "PLYHVtvuJ0rfffq4x--YMoODZ-ooU42Oxm";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout
+  title="Caves, Whales, and Callings"
+  description="Caves, Whales, and Callings — essays and audio companions, by Acts of Surrender."
+>
+  <h1>Caves, Whales, and Callings</h1>
+  <p class="lede">by Acts of Surrender</p>
+
+  <p>
+    Exploring the depths of faith, and the shores of self, to hopefully make it to the Isle of Surrender.
+  </p>
+
+  <div class="btnrow home-cta">
+    <a class="btn primary" href="/essays">Read the essays</a>
+    <a class="btn" href="/podcast">Listen to the podcast</a>
+    <a
+      class="btn"
+      href="https://actsofsurrender.substack.com/subscribe"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Subscribe
+    </a>
+  </div>
+
+  <div class="card">
+    <p>
+      A living archive of essays, reflections, and fragments — written from the mouth of the cave, the belly of the whale, and the edge of a calling.
+    </p>
+  </div>
+
+  <hr />
+
+  <h2>Start here</h2>
+
+  <div class="card">
+    <h3 style="margin:0 0 .35rem;">Latest essay</h3>
+
+    {latestEssay ? (
+      <>
+        <a href={`/essays/${latestEssay.slug}`} style="font-size: 1.1rem;">
+          {latestEssay.title}
+        </a>
+        <div class="meta">
+          {new Date(latestEssay.pubDate).toLocaleDateString("en-GB")}
+        </div>
+
+        <p class="small" style="margin:0;">
+          <a href="/essays">Browse the archive →</a>
+        </p>
+      </>
+    ) : (
+      <p class="small" style="margin:0;">
+        No essays found yet — once your Substack feed is available, they’ll appear here.
+      </p>
+    )}
+  </div>
+
+  <div style="height: 1rem;"></div>
+
+  <div class="card">
+    <h3 style="margin:0 0 .35rem;">Latest podcast</h3>
+    <p class="small" style="margin-top:0;">
+      Audio companions to the essays — read-alouds, with occasional commentary.
+    </p>
+
+    <div class="video">
+      <iframe
+        width="100%"
+        height="420"
+        src={`https://www.youtube.com/embed/videoseries?list=${PLAYLIST_ID}`}
+        title="Caves, Whales, and Callings Podcast"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+        loading="lazy"
+      ></iframe>
+    </div>
+
+    <p class="small" style="margin: .85rem 0 0;">
+      <a
+        href="https://www.youtube.com/playlist?list=PLYHVtvuJ0rfffq4x--YMoODZ-ooU42Oxm"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open the playlist on YouTube →
+      </a>
+    </p>
+  </div>
+</Layout>

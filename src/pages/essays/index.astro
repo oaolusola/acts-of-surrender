@@ -1,0 +1,22 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { fetchSubstackEssays } from "../../lib/substack";
+
+const FEED_URL = "https://actsofsurrender.substack.com/feed";
+const essays = await fetchSubstackEssays(FEED_URL);
+---
+
+<Layout title="Essays | Caves, Whales, and Callings">
+  <h1>Essays</h1>
+  <p class="lede">The archive: essays first published on Substack, kept here as a living archive free from the pressure to subscribe :)  
+  </p>
+
+  <ul class="list">
+    {essays.map((e) => (
+      <li>
+        <a href={`/essays/${e.slug}`}>{e.title}</a>
+        <div class="meta">{new Date(e.pubDate).toLocaleDateString("en-GB")}</div>
+      </li>
+    ))}
+  </ul>
+</Layout>

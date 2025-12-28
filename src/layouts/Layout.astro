@@ -1,0 +1,94 @@
+---
+import "../styles/global.css";
+import { SITE } from "../lib/site";
+
+const {
+  title = SITE.name,
+  description = SITE.description,
+  ogImage = SITE.ogImage,
+} = Astro.props;
+
+const canonicalUrl = new URL(Astro.url.pathname, SITE.url).toString();
+const ogImageUrl = new URL(ogImage, SITE.url).toString();
+---
+
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Open Graph (LinkedIn, Facebook, Threads, Bluesky, etc.) -->
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+
+    <!-- Twitter/X cards (only affects X previews) -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <!-- Fonts (v1 via Google Fonts; we can self-host later) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      body { font-family: "Noto Serif Ethiopic", serif; }
+      h1,h2,h3, nav, .brand-title { font-family: "Bricolage Grotesque", system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    </style>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="container">
+      <div class="masthead">
+        <img
+          src="/images/cwc-header.png"
+          alt="Caves, Whales, and Callings header"
+          width="1100"
+          height="240"
+          loading="eager"
+        />
+      </div>
+
+      <div class="topbar">
+        <div class="brand">
+          <a class="brand-title" href="/">Caves, Whales, and Callings</a>
+          <div class="brand-sub">by Acts of Surrender</div>
+        </div>
+
+        <nav aria-label="Primary">
+          <a href="/essays">Essays</a>
+          <a href="/podcast">Podcast</a>
+          <a href="/about">About</a>
+          <a href="https://actsofsurrender.substack.com/subscribe" target="_blank" rel="noopener noreferrer">Subscribe</a>
+          <a href="/contact">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="content" class="container">
+      <slot />
+    </main>
+
+   <footer class="container footer">
+  <p class="footer-line">
+    Caves, Whales and Callings is an Acts of Surrender essay series. Acts of Surrender explores the wandering of the heart. ·
+    <a href="/support">Support</a>
+  </p>
+</footer>
+
+  </body>
+</html>

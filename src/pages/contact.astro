@@ -1,0 +1,105 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Contact | Caves, Whales, and Callings">
+  <h1>Contact</h1>
+
+  <p class="lede">
+    For invitations, collaborations, commissions, or editorial work — get in touch.
+  </p>
+
+  <p class="lede">
+    You can find out more about who is behind <em>Acts of Surrender</em>{" "}
+    <a
+      href="https://www.linkedin.com/in/omolara-olusola-124901b9/"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      here.
+    </a>
+  </p>
+
+  <div class="card">
+  <form id="contact-form">
+    <label>
+      <span class="small">Name</span><br />
+      <input name="name" type="text" required />
+    </label>
+
+    <div style="height:.75rem;"></div>
+
+    <label>
+      <span class="small">Email</span><br />
+      <input name="email" type="email" required />
+    </label>
+
+    <div style="height:.75rem;"></div>
+
+    <label>
+      <span class="small">Message</span><br />
+      <textarea name="message" rows="6" required></textarea>
+    </label>
+
+    <!-- Honeypot (spam trap). Humans won't fill this; bots often will. -->
+    <input name="company" type="text" tabindex="-1" autocomplete="off" class="hp" />
+
+    <div style="height:1rem;"></div>
+
+    <button class="btn primary" type="submit">Send message</button>
+
+    <p class="small" style="margin-top:.85rem;margin-bottom:0;">
+      Prefer email? <a href="mailto:admin@acts-of-surrender.com">admin@acts-of-surrender.com</a>
+    </p>
+
+    <p class="small" id="form-status" aria-live="polite" style="margin-top:.75rem;"></p>
+  </form>
+</div>
+
+<script>
+  const form = document.getElementById("contact-form");
+  const status = document.getElementById("form-status");
+
+  if (form && status) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      status.textContent = "Sending…";
+
+      const fd = new FormData(form);
+      const payload = Object.fromEntries(fd.entries());
+
+      try {
+        const res = await fetch("/api/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          status.textContent = data?.error || "Sorry — something went wrong. Please email instead.";
+          return;
+        }
+
+        form.reset();
+        status.textContent = "Sent. Thank you — I’ll get back to you soon.";
+      } catch (err) {
+        status.textContent = "Network error. Please try again, or email instead.";
+      }
+    });
+  }
+</script>
+
+  <hr />
+
+  <h2>Subscribe</h2>
+  <p>Subscribe on Substack to receive new essays and audio in your inbox.</p>
+
+  <div class="btnrow">
+    <a class="btn primary" href="https://actsofsurrender.substack.com/subscribe" target="_blank" rel="noopener noreferrer">
+      Subscribe on Substack
+    </a>
+  </div>
+</Layout>

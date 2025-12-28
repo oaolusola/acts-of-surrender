@@ -1,0 +1,42 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { fetchSubstackEssays, type Essay } from "../../lib/substack";
+
+export async function getStaticPaths() {
+  const posts = await fetchSubstackEssays("https://actsofsurrender.substack.com/feed");
+
+  return posts.map((p) => ({
+    params: { slug: p.slug },
+    props: { essay: p },
+  }));
+}
+
+const { essay } = Astro.props as { essay: Essay };
+---
+
+<Layout title={`${essay.title} | Caves, Whales, and Callings`}>
+  <article>
+    <h1>{essay.title}</h1>
+
+    <div class="meta">
+      {new Date(essay.pubDate).toLocaleDateString("en-GB")} ·{" "}
+      <a href={essay.url} target="_blank" rel="noopener noreferrer">
+        Originally published on Substack
+      </a>
+    </div>
+
+    {essay.contentHtml ? (
+  <div class="essay" set:html={essay.contentHtml} />
+) : (
+  
+      <div class="card">
+        <p>{essay.excerpt}…</p>
+        <p>
+          <a href={essay.url} target="_blank" rel="noopener noreferrer">
+            Read on Substack
+          </a>
+        </p>
+      </div>
+    )}
+  </article>
+</Layout>
